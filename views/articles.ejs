@@ -1,18 +1,39 @@
 <%- include("partials/header.ejs") %>
 
-  <div class="list-group">
-    <% if(articleTitles.length === 0) { %>
-      <p class="text-center">
-        There are no articles. Write something using <a href="/compose"> Compose</a>.
-      </p>
-    <% } %>
+<div class="list-group" id="articles-list">
+  <p class="text-center" id="no-articles-msg" style="display:none;">
+    There are no articles. Write something using <a href="/compose"> Compose</a>.
+  </p>
+</div>
 
-    <% for (let i = 0; i < articleTitles.length; i++)  { %>
-      <a href="articles/<%= i %>" class="list-group-item list-group-item-action list-group-item-light py-3 fs-5">
-        <h3><%= articleTitles[i] %></h3>
-        <p class="fs-6 fw-light articles-list-content"><%= articleContents[i] %></p>
-      </a>
-    <% } %>
-  </div>
+<script>
+// Utility to get articles from localStorage
+function getArticles() {
+  return JSON.parse(localStorage.getItem('articles') || '[]');
+}
+
+function renderArticles() {
+  const articles = getArticles();
+  const list = document.getElementById('articles-list');
+  const msg = document.getElementById('no-articles-msg');
+  // Remove old links
+  list.querySelectorAll('a').forEach(a => a.remove());
+  if (articles.length === 0) {
+    msg.style.display = '';
+    return;
+  } else {
+    msg.style.display = 'none';
+  }
+  articles.forEach((article, i) => {
+    const a = document.createElement('a');
+    a.href = `/articles/${i}`;
+    a.className = 'list-group-item list-group-item-action list-group-item-light py-3 fs-5';
+    a.innerHTML = `<h3>${article.title}</h3><p class='fs-6 fw-light articles-list-content'>${article.content}</p>`;
+    list.appendChild(a);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderArticles);
+</script>
 
 <%- include("partials/footer.ejs") %>

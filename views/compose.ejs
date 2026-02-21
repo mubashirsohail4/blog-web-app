@@ -1,9 +1,7 @@
 <%- include("partials/header.ejs") %>
 
 <h1 class="display-5 mb-5">Write your article</h1>
-<form method="POST" <% if(locals.index) {%>
-  action="/publish/<%= index %>?_method=PUT" <% } else { %> action="/publish" <%
-  } %> >
+<form id="articleForm">
   <div class="mb-3">
     <label for="title" class="form-label">Title</label>
     <input
@@ -11,7 +9,6 @@
       class="form-control"
       id="title"
       name="title"
-      value="<%if(locals.title){%><%=title%><%}%>"
       required
     />
   </div>
@@ -23,11 +20,44 @@
       name="content"
       rows="9"
       required
-    >
-<%if(locals.content){%><%=content%><%}%></textarea
-    >
+    ></textarea>
   </div>
   <button class="btn btn-primary btn-lg px-5 y-2" type="submit">Publish</button>
 </form>
+
+<script>
+// Utility to get and set articles in localStorage
+function getArticles() {
+  return JSON.parse(localStorage.getItem('articles') || '[]');
+}
+function setArticles(articles) {
+  localStorage.setItem('articles', JSON.stringify(articles));
+}
+
+// If editing, pre-fill fields
+const urlParts = window.location.pathname.split('/');
+const editIndex = urlParts[2] && !isNaN(urlParts[2]) ? parseInt(urlParts[2]) : null;
+if (editIndex !== null) {
+  const articles = getArticles();
+  if (articles[editIndex]) {
+    document.getElementById('title').value = articles[editIndex].title;
+    document.getElementById('content').value = articles[editIndex].content;
+  }
+}
+
+document.getElementById('articleForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const title = document.getElementById('title').value;
+  const content = document.getElementById('content').value;
+  let articles = getArticles();
+  if (editIndex !== null && articles[editIndex]) {
+    articles[editIndex] = { title, content };
+  } else {
+    articles.push({ title, content });
+  }
+  setArticles(articles);
+  window.location.href = '/published';
+});
+</script>
 
 <%- include("partials/footer.ejs") %>
